@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{% include 'recipes/parciais/_head.html' %}
+
+<title>{% block titulo %}{% endblock titulo %} Recipes</title>
+</head>
+
+<body>
+    {% include 'recipes/parciais/_header.html' %}
+    {% include 'recipes/parciais/_search.html' %}
+    <main class="main-content-container">
+        {% block conteudo %}{% endblock conteudo %}
+    </main>
+    {% include 'recipes/parciais/_footer.html' %} 
+</body>
+</html>
