@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 
-# Create your tests here.
 class RecipeURLsTest(TestCase):
     # def test_the_pytest_ok(self):
     #     assert 1 == 1, 'Um é igual a Um'
