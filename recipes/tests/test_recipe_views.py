@@ -1,5 +1,5 @@
 # usar o skip como decorador para pular o teste
-from unittest import skip
+# from unittest import skip
 
 from django.urls import resolve, reverse
 
@@ -60,7 +60,16 @@ class RecipeViewsTest(RecipeTestBase):
         self.assertIn('João', content)
         self.assertIn('Descrição da Receita', content)
 
-        pass
+    def test_recipe_home_template_do_not_load_not_published(self):
+        """Test recipe is_published false dont show"""
+        self.MakeRecipe(is_published=False)
+
+        response = self.client.get(reverse('recipes:home'))
+
+        self.assertIn(
+            '<div class="center aviso">',
+            response.content.decode('utf-8')
+        )
 
     def test_recipes_category_view_function_is_correct(self):
         view = resolve(reverse('recipes:category', kwargs={'category_id': 1}))
@@ -71,6 +80,24 @@ class RecipeViewsTest(RecipeTestBase):
             reverse('recipes:category', kwargs={'category_id': 100}))
         self.assertEqual(response.status_code, 404)
 
+    def test_recipe_category_template_loads_recipes(self):
+        title_page_category = 'Recipe Title'
+        self.MakeRecipe(title=title_page_category)
+        response = self.client.get(reverse('recipes:category', args=(1,)))
+        self.assertEqual(response.title, title_page_category)
+        content = response.content.decode('utf-8')
+        self.assertIn(title_page_category, content)
+
+    def test_recipe_category_template_do_not_load_not_published(self):
+        """Test recipe is_published false dont show"""
+        # para ter certeza que estou pegando o id de uma categoria criada
+        # é necessario atribuir a criação da receita a uma variavel
+        recipe = self.MakeRecipe(is_published=False)
+
+        response = self.client.get(
+            reverse('recipes:category', kwargs={'category_id': recipe.category.id}))
+        self.assertEqual(response.status_code, 404)
+
     def test_recipes_detail_view_function_is_correct(self):
         view = resolve(reverse('recipes:recipe', kwargs={'id': 1}))
         self.assertIs(view.func, views.recipe)
@@ -78,4 +105,25 @@ class RecipeViewsTest(RecipeTestBase):
     def test_recipes_detail_view_return_404_if_no_recipes_found(self):
         response = self.client.get(
             reverse('recipes:recipe', kwargs={'id': 1}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_recipe_detail_template_loads_recipes(self):
+        title_detail_page = 'This a detail page - It load one recipe'
+
+        # Need a recipe for this test
+        self.MakeRecipe(title=title_detail_page)
+        response = self.client.get(reverse('recipes:recipe',
+                                           kwargs={'id': 1, }))
+        # self.assertEqual(response.title, title_detail_page)
+        content = response.content.decode('utf-8')
+        self.assertIn(title_detail_page, content)
+
+    def test_recipe_detail_template_do_not_load_not_published(self):
+        """Test recipe is_published false dont show"""
+        # para ter certeza que estou pegando o id de uma categoria criada
+        # é necessario atribuir a criação da receita a uma variavel
+        recipe = self.MakeRecipe(is_published=False)
+
+        response = self.client.get(
+            reverse('recipes:recipe', kwargs={'id': recipe.pk}))
         self.assertEqual(response.status_code, 404)
