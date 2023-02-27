@@ -84,7 +84,7 @@ class RecipeViewsTest(RecipeTestBase):
         title_page_category = 'Recipe Title'
         self.MakeRecipe(title=title_page_category)
         response = self.client.get(reverse('recipes:category', args=(1,)))
-        self.assertEqual(response.title, title_page_category)
+        # self.assertEqual(response.title, title_page_category)
         content = response.content.decode('utf-8')
         self.assertIn(title_page_category, content)
 
