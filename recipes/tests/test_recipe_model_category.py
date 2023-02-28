@@ -18,6 +18,6 @@ class RecipeCategoryModelTest(RecipeTestBase):
         )
 
     def test_recipe_category_model_name_max_length_is_hars(self):
-        self.category.name ='a'*66
+        self.category.name = 'a'*66
         with self.assertRaises(ValidationError):
             self.category.full_clean()

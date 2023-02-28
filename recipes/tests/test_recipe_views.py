@@ -95,7 +95,8 @@ class RecipeViewsTest(RecipeTestBase):
         recipe = self.MakeRecipe(is_published=False)
 
         response = self.client.get(
-            reverse('recipes:category', kwargs={'category_id': recipe.category.id}))
+            reverse('recipes:category',
+                    kwargs={'category_id': recipe.category.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_recipes_detail_view_function_is_correct(self):
@@ -127,3 +128,25 @@ class RecipeViewsTest(RecipeTestBase):
         response = self.client.get(
             reverse('recipes:recipe', kwargs={'id': recipe.pk}))
         self.assertEqual(response.status_code, 404)
+
+    def test_recipe_search_uses_correct_view_function(self):
+        url = reverse('recipes:search')
+        resolved = resolve(url)
+        self.assertIs(
+            resolved.func, views.search,
+            msg='Era esperado a função passada na urls.py para o caminho '
+            'recipes:search')
+
+    def test_recipe_search_loads_correct_template(self):
+        response = self.client.get(reverse('recipes:search')+'?search=a')
+        self.assertTemplateUsed(response, 'recipes/pages/search.html')
+
+    def test_recipe_search_raises_404_if_no_search_term(self):
+        url = reverse('recipes:search')
+        response = self.client.get(url)
+        # O meu nesse momento esta diferente do professor por causa que quero
+        # exibir uma pagina personalizada
+        self.assertEqual(
+            response.status_code,
+            404
+        )
