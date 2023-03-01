@@ -18,6 +18,14 @@ class RecipeURLsTest(TestCase):
         url = reverse('recipes:recipe', kwargs={'id': 1})
         self.assertEqual(url, '/recipes/1/')
 
-    def teste_recipe_search_url_is_correct(self):
+    def test_recipe_search_url_is_correct(self):
         url = reverse('recipes:search')
         self.assertEqual(url, '/recipes/search/')
+
+    def test_recipe_search_term_is_on_page_and_espade(self):
+        url = reverse('recipes:search') + '?search="teste"'
+        response = self.client.get(url)
+        self.assertIn(
+            'Search for &quot;teste&quot;',
+            response.content.decode('utf-8')
+        )
