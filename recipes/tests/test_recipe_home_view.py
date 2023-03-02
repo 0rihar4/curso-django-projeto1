@@ -1,6 +1,8 @@
 # usar o skip como decorador para pular o teste
 # from unittest import skip
 
+from unittest.mock import patch
+
 from django.urls import resolve, reverse
 
 from recipes import views
@@ -70,3 +72,22 @@ class RecipeHomeViewTest(RecipeTestBase):
             '<div class="center aviso">',
             response.content.decode('utf-8')
         )
+
+    def test_recipe_home_is_paginated(self):
+        # é possivel fazer com decorator
+        # @patch('recipes.views.PER_PAGE', new=3)
+        for i in range(8):
+            kwargs = {'author_data': {'username': f'u{i}'}, 'slug': f'r{i}'}
+            self.MakeRecipe(**kwargs)
+
+        with patch('recipes.views.PER_PAGE', new=3):
+            response = self.client.get(reverse('recipes:home'))
+            recipes = response.context['recipes']
+            # Como o pagination esta vinculado ao nosso contexto conseguimos
+            # acessar ele e suas informações como qntd por pagina, num de paginas # noqa:E501
+            pagination = recipes.paginator
+
+            self.assertEqual(pagination.num_pages, 3)
+            self.assertEqual(len(pagination.get_page(1)), 3)
+            self.assertEqual(len(pagination.get_page(2)), 3)
+            self.assertEqual(len(pagination.get_page(3)), 2)

@@ -1,14 +1,16 @@
-from django.core.paginator import Paginator
+import os
+
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_list_or_404, get_object_or_404, render
 
-from utils.recipes.pagination import make_pagination_range
+from utils.recipes.pagination import make_pagination
 
 # from utils.recipes.factory import make_recipe
 from .models import Recipe
 
 # Create your views here.
+PER_PAGE = int(os.environ.get('PER_PAGE', 9))
 
 
 def home(request):
@@ -17,11 +19,12 @@ def home(request):
     recipes = Recipe.objects.all().filter(
         is_published=True,
     ).order_by('-id')
-    current_page = request.GET.get('page', 1)
-    paginator = Paginator(recipes, 9)
-    page_object = paginator.get_page(current_page)
+
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
     return render(request, 'recipes/pages/home.html', context={
-        'recipes': page_object,
+        'recipes': page_obj,
+        'pagination_range': pagination_range,
     })
 
 
@@ -42,9 +45,12 @@ def category(request, category_id):
     #     # Filtros para a query
     #     category__id=category_id,is_published=True,
     #     )
+
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
     return render(request, 'recipes/pages/category.html', context={
-        'recipes': recipes,
+        'recipes': page_obj,
         'title': f'{recipes[0].category.name}',
+        'pagination_range': pagination_range,
     })
 
 
@@ -85,8 +91,11 @@ def search(request):
     # recipes = recipes.order_by('-id')
     # Para ver a query que ta sendo consultada no console de depuração
     # basta colocar str(recipes.query)
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
     return render(request, 'recipes/pages/search.html', {
         'page_title': f'Search for {search_term} |',
         'search_term': search_term,
-        'recipes': recipes
+        'recipes': page_obj,
+        'pagination_range': pagination_range,
+        'additional_url_query': f'&search={search_term}'
     })
