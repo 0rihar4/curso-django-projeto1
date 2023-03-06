@@ -33,17 +33,18 @@ class RegisterForm(forms.ModelForm):
     # e novamente dentro do meta
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        add_attr(self.fields['first_name'], 'Label', 'Nome')
+        add_attr(self.fields['first_name'], 'Label', 'Nome:')
         add_placeholder(self.fields['first_name'], 'Digite seu nome:')
         add_attr(self.fields['last_name'], 'Label', 'Sobrenome:')
         add_placeholder(self.fields['last_name'], 'Digite seu sobrenome:')
+        add_placeholder(self.fields['email'], 'Digite seu email:')
 
     password = forms.CharField(
             required=True,
             widget=forms.PasswordInput(attrs={
-                'placeholder': 'Digite sua senha'
+                'placeholder': 'Digite sua senha:'
             }),
-            label='Digite sua senha',
+            label='Senha:',
             error_messages={
                 'required': 'Esse campo não pode ficar vazio',
             },
@@ -53,9 +54,9 @@ class RegisterForm(forms.ModelForm):
     password2 = forms.CharField(
             required=True,
             widget=forms.PasswordInput(attrs={
-                'placeholder': 'Repita sua senha'
+                'placeholder': 'Repita sua senha:'
             }),
-            label='Repita sua senha',
+            label='Repita sua senha:',
             error_messages={
                 'required': 'Esse campo não pode ficar vazio',
             },
@@ -72,10 +73,10 @@ class RegisterForm(forms.ModelForm):
             'password',
         ]
         labels = {
-            'username': 'Login',
-            'first_name': 'Nome',
-            'last_name': 'Sobrenome',
-            'email': 'e-mail',
+            'username': 'Login:',
+            'first_name': 'Nome:',
+            'last_name': 'Sobrenome:',
+            'email': 'e-mail:',
 
         }
         help_text = {
@@ -98,7 +99,7 @@ class RegisterForm(forms.ModelForm):
                 'test': 'attr_teste'
             }),
             'password': forms.PasswordInput(attrs={
-                'placeholder': 'Digite sua senha',
+                'placeholder': 'Digite sua senha:',
                 'show': 'show',
             }),
 
