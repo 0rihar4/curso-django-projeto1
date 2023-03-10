@@ -1,28 +1,8 @@
-import re
-
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-
-def add_attr(field, attr_name, attr_new_val):
-    existing_attr = field.widget.attrs.get(attr_name, '')
-    field.widget.attrs[attr_name] = f'{existing_attr} {attr_new_val}'.strip()
-
-
-def add_placeholder(field, placeholder_val):
-    add_attr(field, 'placeholder', placeholder_val)
-
-
-def strong_password(passowrd):
-    regex = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$')
-    if not regex.match(passowrd):
-        raise ValidationError(
-            'Sua senha %(senha)s é muito fraca! Ela deve conte 8 caracteres,'
-            'sendo uma maiuscula, uma minuscula, um numero',
-            code='min_lenght',
-            params={'senha': passowrd}
-        )
+from utils.django_forms import add_attr, add_placeholder, strong_password
 
 
 class RegisterForm(forms.ModelForm):
@@ -33,11 +13,31 @@ class RegisterForm(forms.ModelForm):
     # e novamente dentro do meta
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        add_attr(self.fields['first_name'], 'Label', 'Nome:')
         add_placeholder(self.fields['first_name'], 'Digite seu nome:')
         add_attr(self.fields['last_name'], 'Label', 'Sobrenome:')
         add_placeholder(self.fields['last_name'], 'Digite seu sobrenome:')
         add_placeholder(self.fields['email'], 'Digite seu email:')
+
+    first_name = forms.CharField(
+        error_messages={'required': 'Escreva seu nome'},
+        required=True,
+        label='Nome:'
+    )
+
+    username = forms.CharField(
+        label='Login:',
+        help_text='Obrigatório. 150 caracteres ou menos. Letras, números e @/./+/-/_ apenas.',  # noqa
+        error_messages={
+            'required': 'Esse campo não pode ser vazio',
+            'max_length': 'Esse ultrapassou o limite de 64 caracteres',
+            'min_length': 'Digite um username valido',
+        },
+        widget=forms.TextInput(attrs={
+                'placeholder': 'Digite o seu login'
+            }),
+        max_length=64, min_length=4
+
+    )
 
     password = forms.CharField(
             required=True,
@@ -74,7 +74,6 @@ class RegisterForm(forms.ModelForm):
         ]
         labels = {
             'username': 'Login:',
-            'first_name': 'Nome:',
             'last_name': 'Sobrenome:',
             'email': 'e-mail:',
 
@@ -83,7 +82,7 @@ class RegisterForm(forms.ModelForm):
             'email': 'The e-mail must be valid.'
         }
         error_messages = {
-            'usernamre': {
+            'last_name': {
                 'required': 'Esse campo não pode ser vazio',
                 'max_length': 'Esse ultrapassou o limite de 64 caracteres',
             }
@@ -93,7 +92,6 @@ class RegisterForm(forms.ModelForm):
         widgets = {
             'username': forms.TextInput(attrs={
                 # é possivel personalizar todos attrs do input ate criar
-                'placeholder': 'Digite o seu login',
                 'class': 'input text-input outra-classe',
                 'name': 'username_input',
                 'test': 'attr_teste'
@@ -117,6 +115,18 @@ class RegisterForm(forms.ModelForm):
                 params={'senha': data}
             )
         return data
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '')
+        exists = User.objects.filter(email=email).exists()
+
+        if exists:
+            raise ValidationError(
+                'Esse email ja esta cadastrado!', code='invalid',
+            )
+
+        return email
+
     # o metodo clean sozinho valida o formulario como todo, mas por ordem de
     # execução ele sera executado sempre apos os metodo clean_nome_do_campo
 
@@ -129,7 +139,8 @@ class RegisterForm(forms.ModelForm):
 
         if password != password2:
             password_confirmation_error = ValidationError(
-                'Sua senha %(senha1)s não condiz com a %(senha2)s',
+                'Sua senha não condiz com a digitada '
+                'no campo de repetição',
                 code='invalid',
                 params={'senha1': password, 'senha2': password2}
             )

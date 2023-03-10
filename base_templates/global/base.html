@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{% include 'global/parciais/_head.html' %}
+
+<title>{% block titulo %}{% endblock titulo %} Recipes</title>
+</head>
+
+<body>
+    {% include 'global/parciais/_header.html' %}
+    {% include 'global/parciais/_search.html' %}
+    <main class="main-content-container">
+        {% block conteudo %}{% endblock conteudo %}
+        {% include 'global/parciais/_pagination.html' %}
+    </main>
+    {% include 'global/parciais/_footer.html' %} 
+</body>
+</html>
