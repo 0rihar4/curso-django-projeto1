@@ -1,3 +1,5 @@
+import os
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -5,7 +7,9 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from .forms import LoginForm, RegisterForm
+from authors.forms import LoginForm, RegisterForm
+from recipes.models import Recipe
+from utils.recipes.pagination import make_pagination
 
 # Create your views here.
 
@@ -66,11 +70,15 @@ def login_create(request):
         if authenticated_user is not None:
             messages.success(request, 'Você realizou seu login!')
             login(request, authenticated_user)
+            return redirect(reverse('authors:dashboard'))
         else:
             messages.error(request, 'Credenciais invalidas!')
     else:
         messages.error(request, 'Senha ou Login invalidos!')
     return redirect(login_url)
+
+
+PER_PAGE = int(os.environ.get('PER_PAGE', 9))
 
 
 @login_required(login_url='authors:login', redirect_field_name='next')
@@ -87,3 +95,19 @@ def logout_view(request):
 
     logout(request)
     return redirect(reverse('authors:login'))
+
+
+@login_required(login_url='authors:login', redirect_field_name='next')
+def dashboard(request):
+    recipes = Recipe.objects.filter(
+        is_published=False,
+        author=request.user,
+    ).order_by('-pk')
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+    return render(request,
+                  'authors/pages/dashboard.html',
+                  context={
+                      'recipes': page_obj,
+                      'pagination_range': pagination_range,
+                  }
+                  )

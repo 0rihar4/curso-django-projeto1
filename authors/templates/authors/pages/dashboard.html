@@ -1,0 +1,36 @@
+{% extends 'global/base.html' %}
+{% block titulo %}Dashboard{% endblock titulo %}
+{% block conteudo %}
+<div class="main-content center container">
+    <h2>Dashboard ({{request.user.first_name}})</h2>
+    {% include 'authors/parciais/_login_messages.html' %}
+    <div class="authors-dashboard-container">
+        <h3>Your Recipe</h3>
+        <div class="main-content center container">
+            {% include 'global/parciais/_messages.html' %}
+        </div>
+        <ul>
+            {% for recipe in recipes  %}
+                <li>
+                    <a href="{% url 'authors:dashboard_recipe_edit' recipe.id %}">{{recipe.title}}</a> - 
+                    <form
+                    class="inline-form form-delete"
+                    action="{% url 'authors:dashboard_recipe_delete'%}"
+                    method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value='{{recipe.id}}'>
+                        <button class="plaintext-button">❌</button>
+                    </form>
+                </li>
+            {%empty%}
+                <div class="center aviso">
+                    <h1>Todas suas receitas estão publicadas!*: .｡. o(≧▽≦)o .｡.:*☆</h1>
+                    <p>Ou você não tem nenhuma receita no nosso site (┬┬﹏┬┬)</p>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% include 'global/parciais/_form.html' %}
+{% endblock conteudo %}
