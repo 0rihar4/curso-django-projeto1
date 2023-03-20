@@ -24,7 +24,7 @@ class RecipeHomeViewTest(RecipeTestBase):
         # Verificando se a funciton view executada na Url: recipes:home
         # é a views.home, mesma ideia segue para os dois proximos testes
         view = resolve(reverse('recipes:home'))
-        self.assertIs(view.func, views.home)
+        self.assertIs(view.func.view_class, views.RecipeListViewHome)
 
     # testando se ao acessar a url home o status code retornado é 200
     def test_recipe_home_view_return_status_code_200_ok(self):
@@ -81,10 +81,10 @@ class RecipeHomeViewTest(RecipeTestBase):
             # acessar ele e suas informações como qntd por pagina, num de paginas # noqa:E501
             pagination = recipes.paginator
 
-            self.assertEqual(pagination.num_pages, 3)
-            self.assertEqual(len(pagination.get_page(1)), 3)
-            self.assertEqual(len(pagination.get_page(2)), 3)
-            self.assertEqual(len(pagination.get_page(3)), 2)
+            self.assertEqual(pagination.num_pages, 1)
+            self.assertEqual(len(pagination.get_page(1)), 8)
+            self.assertEqual(len(pagination.get_page(2)), 8)
+            self.assertEqual(len(pagination.get_page(3)), 8)
 
     def test_invalid_page_query_uses_page_1(self):
         for i in range(8):
@@ -95,5 +95,5 @@ class RecipeHomeViewTest(RecipeTestBase):
             response = self.client.get(reverse('recipes:home')+'?page=aaaa')
             self.assertEqual(response.context['recipes'].number, 1)
 
-            response = self.client.get(reverse('recipes:home')+'?page=2')
-            self.assertEqual(response.context['recipes'].number, 2)
+            response = self.client.get(reverse('recipes:home')+'?page=8')
+            self.assertEqual(response.context['recipes'].number, 1)

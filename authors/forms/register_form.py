@@ -83,7 +83,7 @@ class RegisterForm(forms.ModelForm):
         }
         error_messages = {
             'last_name': {
-                'required': 'Esse campo não pode ser vazio',
+                'required': 'Esse campo não pode ser vazio 2222',
                 'max_length': 'Esse ultrapassou o limite de 64 caracteres',
             }
         }
@@ -136,7 +136,10 @@ class RegisterForm(forms.ModelForm):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         password2 = cleaned_data.get('password2')
+        last_name = cleaned_data.get('last_name')
 
+        if last_name is None:
+            raise ValidationError('last_name')
         if password != password2:
             password_confirmation_error = ValidationError(
                 'Sua senha não condiz com a digitada '

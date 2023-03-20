@@ -19,12 +19,12 @@ class RecipeViewsTest(RecipeTestBase):
         return super().tearDown()
 
     def test_recipes_detail_view_function_is_correct(self):
-        view = resolve(reverse('recipes:recipe', kwargs={'id': 1}))
-        self.assertIs(view.func, views.recipe)
+        view = resolve(reverse('recipes:recipe', kwargs={'pk': 21}))
+        self.assertIs(view.func.view_class, views.RecipeDetail)
 
     def test_recipes_detail_view_return_404_if_no_recipes_found(self):
         response = self.client.get(
-            reverse('recipes:recipe', kwargs={'id': 1}))
+            reverse('recipes:recipe', kwargs={'pk': 1}))
         self.assertEqual(response.status_code, 404)
 
     def test_recipe_detail_template_loads_recipes(self):
@@ -33,7 +33,7 @@ class RecipeViewsTest(RecipeTestBase):
         # Need a recipe for this test
         self.MakeRecipe(title=title_detail_page)
         response = self.client.get(reverse('recipes:recipe',
-                                           kwargs={'id': 1, }))
+                                           kwargs={'pk': 1, }))
         # self.assertEqual(response.title, title_detail_page)
         content = response.content.decode('utf-8')
         self.assertIn(title_detail_page, content)
@@ -45,5 +45,5 @@ class RecipeViewsTest(RecipeTestBase):
         recipe = self.MakeRecipe(is_published=False)
 
         response = self.client.get(
-            reverse('recipes:recipe', kwargs={'id': recipe.pk}))
+            reverse('recipes:recipe', kwargs={'pk': recipe.pk}))
         self.assertEqual(response.status_code, 404)

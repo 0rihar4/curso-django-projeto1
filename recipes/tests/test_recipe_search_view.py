@@ -22,7 +22,7 @@ class RecipeViewsTest(RecipeTestBase):
         url = reverse('recipes:search')
         resolved = resolve(url)
         self.assertIs(
-            resolved.func, views.search,
+            resolved.func.view_class, views.RecipeListViewSearch,
             msg='Era esperado a função passada na urls.py para o caminho '
             'recipes:search')
 
